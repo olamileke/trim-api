@@ -20,9 +20,9 @@ class Users(Resource):
         self.parser.add_argument('name', type=str, required=True,
         help='name is required')
         self.parser.add_argument('email', type=email, required=True,
-        help='email is required')
+        help='valid email is required')
         self.parser.add_argument('password', type=password, required=True,
-        help='password is required')
+        help='password must be at least 8 characters')
 
         args = self.parser.parse_args()
 

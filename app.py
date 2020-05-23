@@ -3,6 +3,7 @@ from flask import Flask
 from flask_migrate import Migrate
 from models import db
 from resources.users import Users
+from resources.auth import Auth
 import config
 import os
 
@@ -29,6 +30,7 @@ migrate.init_app(app, db)
 api = Api(app)
 
 api.add_resource(Users, '/users')
+api.add_resource(Auth, '/authenticate')
 
 if __name__ == '__main__':
     app.run()
