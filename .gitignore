@@ -1,4 +1,7 @@
 
+# Configuration
+config.py
+
 # Virtual Machine folder
 venv
 
