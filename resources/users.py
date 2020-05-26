@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse, fields, marshal
+from flask import current_app
 from werkzeug.security import generate_password_hash
 from models import db, User
 from utilities.validators import email, password

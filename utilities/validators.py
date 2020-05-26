@@ -1,4 +1,20 @@
 from validate_email import validate_email
+import re
+
+
+def url(value):
+    url_match = re.compile('.*http.*')
+
+    if url_match.findall(value) is None:
+        raise ValueError('invalid url')
+
+    return value
+
+def group_name(value):
+    if len(value) < 5:
+        raise ValueError('name must be at least 5 characters')
+        
+    return value
 
 def email(value): 
     if validate_email(value) == False:

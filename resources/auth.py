@@ -27,11 +27,12 @@ class Auth(Resource):
         user = User.query.filter((User.email == args['email'])).first()
 
         if user is None:
-            return { 'error':{'message':'Invalid email or password'} }, 404
+            return {'error':{'message':'Incorrect email or password'}}, 404
         
         if check_password_hash(user.password, args['password']) == False:
-            return { 'error':{'message':'Invalid email or password'} }, 404
+            return {'error':{'message':'Incorrect email or password'}}, 404
 
+    
         data = {'token':generate_token(user.id), 'user':user}
 
         return marshal(data, self.field, envelope='data')

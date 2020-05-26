@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from models import db
 from resources.users import Users
 from resources.auth import Auth
+from resources.groups import Groups
 import config
 import os
 
@@ -19,7 +20,7 @@ def enable_cors(response):
     response.headers.add('Content-Type', 'application/json')
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accepts')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accepts, Authorization')
     response.headers.add('Access-Control-Expose-Headers', 'Content-Type,Content-Length,Authorization,X-Pagination')
 
     return response
@@ -31,6 +32,7 @@ api = Api(app)
 
 api.add_resource(Users, '/users')
 api.add_resource(Auth, '/authenticate')
+api.add_resource(Groups, '/groups')
 
 if __name__ == '__main__':
     app.run()
