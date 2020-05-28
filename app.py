@@ -6,6 +6,7 @@ from resources.users import Users
 from resources.auth import Auth
 from resources.groups import Groups
 from resources.urls import Urls
+from resources.url import Url
 import config
 import os
 
@@ -35,6 +36,7 @@ api.add_resource(Users, '/users')
 api.add_resource(Auth, '/authenticate')
 api.add_resource(Groups, '/groups')
 api.add_resource(Urls, '/urls')
+api.add_resource(Url, '/urls/<int:url_id>')
 
 if __name__ == '__main__':
     app.run()

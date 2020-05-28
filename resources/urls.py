@@ -10,9 +10,11 @@ class Urls(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser();
         self.url = {
-            'group_id':fields.Integer(attribute='group_id'),
+            'id':fields.Integer(attribute='id'),
+            'group_name':fields.String(attribute='group_name', default=None),
             'path':fields.String(attribute='path'),
             'short_path':fields.String(attribute='short_path'),
+            'num_redirects':fields.Integer(attribute='num_redirects', default=0),
             'created_at':fields.String(attribute='created_time')
         }
         self.method_decorators = [authenticate]
@@ -34,9 +36,19 @@ class Urls(Resource):
 
         return marshal(url, self.url, envelope='data'), 201
 
+    def get(self):
+        urls = Url.query.filter((Url.user_id == g.user.id)).all()
+
+        for url in urls:
+            url.num_redirects = len(url.redirects)
+            url.created_time = url.created_at.strftime('%B %d, %Y %H:%M')
+
+        return marshal(urls, self.url, envelope='data')
+
     def shorten(self, length=6):
         characters = string.ascii_letters + string.digits
         short_path = ''.join(random.sample(characters, length))
         return short_path
 
         
+    
