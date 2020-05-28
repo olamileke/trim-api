@@ -1,6 +1,12 @@
 from validate_email import validate_email
 import re
 
+ 
+def url_group(value):
+    if value is None or isinstance(int(value), int):
+        return value
+
+    raise ValueError('Invalid group')
 
 def url(value):
     url_match = re.compile('.*http.*')
