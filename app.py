@@ -7,6 +7,7 @@ from resources.auth import Auth
 from resources.groups import Groups
 from resources.urls import Urls
 from resources.url import Url
+from resources.group import Group
 import config
 import os
 
@@ -35,6 +36,7 @@ api = Api(app)
 api.add_resource(Users, '/users')
 api.add_resource(Auth, '/authenticate')
 api.add_resource(Groups, '/groups')
+api.add_resource(Group, '/groups/<int:group_id>')
 api.add_resource(Urls, '/urls')
 api.add_resource(Url, '/urls/<int:url_id>')
 

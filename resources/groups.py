@@ -8,7 +8,7 @@ class Groups(Resource):
     def __init__(self):
         self.method_decorators = [authenticate]
         self.parser = reqparse.RequestParser()
-        self.group = {
+        self.groupField = {
             'id':fields.Integer(attribute='id'),
             'name':fields.String(attribute='name'),
             'url':fields.String(attribute='path'),
@@ -23,7 +23,7 @@ class Groups(Resource):
             group.num_urls = len(group.urls)
             group.created_time = group.created_at.strftime('%B %d, %Y %H:%M')
         
-        return marshal(groups, self.group, envelope='data')
+        return marshal(groups, self.groupField, envelope='data')
     
     def post(self):
         self.parser.add_argument('name', type=group_name,
@@ -37,4 +37,4 @@ class Groups(Resource):
         db.session.add(group)
         db.session.commit()
 
-        return marshal(group, self.group, envelope='data'), 201
+        return marshal(group, self.groupField, envelope='data'), 201

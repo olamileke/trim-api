@@ -9,7 +9,7 @@ import string
 class Urls(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser();
-        self.url = {
+        self.urlField = {
             'id':fields.Integer(attribute='id'),
             'group_name':fields.String(attribute='group_name', default=None),
             'path':fields.String(attribute='path'),
@@ -34,7 +34,7 @@ class Urls(Resource):
         db.session.add(url)
         db.session.commit()
 
-        return marshal(url, self.url, envelope='data'), 201
+        return marshal(url, self.urlField, envelope='data'), 201
 
     def get(self):
         urls = Url.query.filter((Url.user_id == g.user.id)).all()
@@ -43,7 +43,7 @@ class Urls(Resource):
             url.num_redirects = len(url.redirects)
             url.created_time = url.created_at.strftime('%B %d, %Y %H:%M')
 
-        return marshal(urls, self.url, envelope='data')
+        return marshal(urls, self.urlField, envelope='data')
 
     def shorten(self, length=6):
         characters = string.ascii_letters + string.digits
