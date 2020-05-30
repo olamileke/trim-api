@@ -13,10 +13,10 @@ class User(db.Model):
     avatar = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
-    groups = db.relationship('Group', backref=db.backref('user', lazy=False), lazy=False)
-    urls = db.relationship('Url', backref=db.backref('user', lazy=False), lazy=False)
-    redirects = db.relationship('Redirect', backref=db.backref('user', lazy=False), lazy=False)
-    resets = db.relationship('PasswordReset', backref=db.backref('user', lazy=False), lazy=False, uselist=False)
+    groups = db.relationship('Group', backref=db.backref('user', lazy=True), lazy=True)
+    urls = db.relationship('Url', backref=db.backref('user', lazy=True), lazy=True)
+    redirects = db.relationship('Redirect', backref=db.backref('user', lazy=True), lazy=True)
+    resets = db.relationship('PasswordReset', backref=db.backref('user', lazy=True), lazy=True, uselist=False)
 
 
 class Group(db.Model):
@@ -28,8 +28,8 @@ class Group(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
-    urls = db.relationship('Url', cascade='all, delete-orphan', backref=db.backref('group', lazy=False), lazy=False)
-    redirects = db.relationship('Redirect', cascade='all, delete-orphan', backref=db.backref('group', lazy=False), lazy=False)
+    urls = db.relationship('Url', cascade='all, delete-orphan', backref=db.backref('group', lazy=True), lazy=True)
+    redirects = db.relationship('Redirect', cascade='all, delete-orphan', backref=db.backref('group', lazy=True), lazy=True)
 
 
 class Url(db.Model):
@@ -42,7 +42,7 @@ class Url(db.Model):
     short_path = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
-    redirects = db.relationship('Redirect', cascade='all, delete-orphan', backref=db.backref('url', lazy=False), lazy=False)
+    redirects = db.relationship('Redirect', cascade='all, delete-orphan', backref=db.backref('url', lazy=True), lazy=True)
 
 
 class Redirect(db.Model):

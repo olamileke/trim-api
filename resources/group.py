@@ -67,7 +67,7 @@ class Group(Resource):
 
         db.session.commit()
 
-        return {'data':{'message':'Group updated successfully'}}
+        return {'data':{'message':'group updated successfully'}}
 
 
     def delete(self, group_id):

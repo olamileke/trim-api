@@ -29,6 +29,13 @@ class Urls(Resource):
 
         args = self.parser.parse_args()
 
+        url = Url.query.filter((Url.path == args['url']) & 
+        (Url.user_id == g.user.id)).first()
+
+        if url is not None:
+            message = '{0} has been shortened'.format(args['url'])
+            return {'error':{'message':message}}, 403
+
         url = Url(group_id=args['group_id'], user_id=g.user.id,
         path=args['url'], short_path=self.shorten(args['length']))
         db.session.add(url)
