@@ -13,6 +13,7 @@ class Groups(Resource):
             'name':fields.String(attribute='name'),
             'url':fields.String(attribute='path'),
             'num_urls':fields.Integer(default=0),
+            'num_redirects':fields.Integer(default=0),
             'created_at':fields.String(default=None, attribute='created_time')
         }
 
@@ -21,6 +22,7 @@ class Groups(Resource):
 
         for group in groups:
             group.num_urls = len(group.urls)
+            group.num_redirects = len(group.redirects)
             group.created_time = group.created_at.strftime('%B %d, %Y %H:%M')
         
         return marshal(groups, self.groupField, envelope='data')

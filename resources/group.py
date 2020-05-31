@@ -27,6 +27,7 @@ class Group(Resource):
             'name':fields.String(attribute='name'),
             'url':fields.String(attribute='path'),
             'num_urls':fields.Integer(default=0),
+            'num_redirects':fields.Integer(default=0),
             'created_at':fields.String(default=None, attribute='created_time'),
             'urls':UrlField(attribute='urls')
         }

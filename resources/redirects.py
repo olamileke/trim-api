@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse, fields, marshal
-from flask import g
+from flask import g, current_app
 from utilities.validators import shortened_link, redirect_source
 from utilities.middlewares import authenticate
 from models import db, Redirect, Url
@@ -29,12 +29,13 @@ class Redirects(Resource):
             group_id = None
         else:
             group_id = url.group_id
-        
-        redirect = Redirect(user_id=g.user.id, url_id=url.id, group_id=group_id,
-        source=args['source'])
 
-        db.session.add(redirect)
-        db.session.commit()
+        if args['source'] not in current_app.config['CLIENT_URL']:
+            redirect = Redirect(user_id=g.user.id, url_id=url.id, group_id=group_id,
+            source=args['source'])
+
+            db.session.add(redirect)
+            db.session.commit()
 
         return marshal(url, self.redirect_field, envelope='data'), 201
 

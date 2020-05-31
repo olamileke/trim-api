@@ -11,6 +11,7 @@ class Config(object):
     DB_PORT = 'localhost:5432'
     DB_NAME = 'trim'
     SECRET_KEY = 'mYYP2dJBNeyclufoYuEJ'
+    CLIENT_URL = 'http://localhost:4200'
 
 
 class DevelopmentConfig(Config):
