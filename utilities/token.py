@@ -9,4 +9,5 @@ def generate_token(id):
         'sub':id
     }
 
-    return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
+    return jwt.encode(payload, current_app.config['SECRET_KEY'],
+    algorithm='HS256').decode('utf-8')

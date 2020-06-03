@@ -62,8 +62,9 @@ class Url(Resource):
 
         url.path = args['url']
         db.session.commit()
-
-        return {'data':{'message':'url updated successfully'}}
+        data = {'url':url, 'redirects':url.redirects}
+        
+        return marshal(data, self.url_field, envelope='data')
 
     def delete(self, url_id):
         url = UrlModel.query.filter((UrlModel.id == url_id) &

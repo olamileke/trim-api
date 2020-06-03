@@ -18,7 +18,8 @@ class Groups(Resource):
         }
 
     def get(self):
-        groups = Group.query.filter((Group.user_id == g.user.id)).all()
+        groups = Group.query.filter((Group.user_id 
+        == g.user.id)).order_by(Group.created_at.desc()).all()
 
         for group in groups:
             group.num_urls = len(group.urls)

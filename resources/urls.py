@@ -1,5 +1,5 @@
 from flask_restful import Resource, marshal, fields, reqparse
-from flask import g
+from flask import g, current_app, request
 from utilities.validators import url as url_validator, url_group
 from utilities.middlewares import authenticate
 from models import db, Url
@@ -44,13 +44,26 @@ class Urls(Resource):
         return marshal(url, self.urlField, envelope='data'), 201
 
     def get(self):
-        urls = Url.query.filter((Url.user_id == g.user.id)).all()
+        page = request.args.get('page')
+
+        if page is None:
+            page = 1
+
+        per_page = current_app.config['PER_PAGE']
+        start = (int(page) - 1) * per_page
+        stop = int(page) * per_page
+
+        urls = Url.query.filter((Url.user_id == g.user.id)).order_by(Url.created_at.desc())[start:stop]
+        total_urls = Url.query.filter((Url.user_id == g.user.id)).count()
 
         for url in urls:
             url.num_redirects = len(url.redirects)
             url.created_time = url.created_at.strftime('%B %d, %Y %H:%M')
 
-        return marshal(urls, self.urlField, envelope='data')
+        urls_data = marshal(urls, self.urlField)
+        data = {'total_urls':total_urls, 'urls':urls_data}
+
+        return {'data':data}
 
     def shorten(self, length=6):
         characters = string.ascii_letters + string.digits

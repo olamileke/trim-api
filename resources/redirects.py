@@ -13,8 +13,8 @@ class Redirects(Resource):
         }
 
     def post(self):
-        self.parser.add_argument('short_path', required=True, type=shortened_link,
-        help='short link must be between 6-10 characters in length')
+        self.parser.add_argument('short_path', required=True, type=str,
+        help='short link must be a string')
         self.parser.add_argument('source', required=True, type=redirect_source,
         help='redirect source must be a valid url')
 

@@ -12,7 +12,7 @@ class Config(object):
     DB_NAME = 'trim'
     SECRET_KEY = 'mYYP2dJBNeyclufoYuEJ'
     CLIENT_URL = 'http://localhost:4200'
-
+    PER_PAGE = 4
 
 class DevelopmentConfig(Config):
     DEBUG = False

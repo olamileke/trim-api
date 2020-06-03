@@ -1,8 +1,10 @@
 from flask_restful import Resource, reqparse, fields, marshal
-from flask import current_app
+from flask import current_app, request, g
 from werkzeug.security import generate_password_hash
 from models import db, User
 from utilities.validators import email, password
+from utilities.middlewares import authenticate
+from os import path
 
 user = {}
 user['name'] = fields.String(attribute='name')
@@ -16,6 +18,7 @@ user_field = {
 class Users(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
+        self.method_decorators = {'patch':[authenticate]}
 
     def post(self):
         self.parser.add_argument('name', type=str, required=True,
@@ -32,8 +35,25 @@ class Users(Resource):
         if user:
             return {'error':{'message':'User with email exists'}}, 403
 
-        new_user = User(name=args['name'], email=args['email'], password=generate_password_hash(args['password']))
+        avatar_path = self.generate_default_user_image()
+        new_user = User(name=args['name'], email=args['email'], password=generate_password_hash(args['password']),
+        avatar=avatar_path)
         db.session.add(new_user)
         db.session.commit()
         return marshal(new_user, user_field, envelope='data'), 201
+
+    def patch(self):
+        image = request.files['image']
+
+        if image.filename == '':
+            return {'error':{'message':'upload a valid image'}}
+
+        return {'image':image.filename}
+
+
+    def generate_default_user_image(self):
+        avatar_path = path.join(current_app.config['BASE_DIR'], 'images', 'users', 'anon.png')
+
+        return avatar_path
+
 

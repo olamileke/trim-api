@@ -28,8 +28,8 @@ class Group(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
-    urls = db.relationship('Url', cascade='all, delete-orphan', backref=db.backref('group', lazy=True), lazy=True)
-    redirects = db.relationship('Redirect', cascade='all, delete-orphan', backref=db.backref('group', lazy=True), lazy=True)
+    urls = db.relationship('Url', cascade='all, delete-orphan', order_by='Url.created_at.desc()', backref=db.backref('group', lazy=True), lazy=True)
+    redirects = db.relationship('Redirect', cascade='all, delete-orphan', order_by='Redirect.created_at.desc()', backref=db.backref('group', lazy=True), lazy=True)
 
 
 class Url(db.Model):
