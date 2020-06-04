@@ -20,7 +20,7 @@ class RedirectsField(fields.Raw):
 class Url(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
-        self.url_field = {
+        self.url_all_field = {
             'id':fields.Integer(attribute='url.id'),
             'group_name':fields.String(attribute='url.group_name', default=None),
             'group_path':fields.String(attribute='url.group_path', default=None),
@@ -29,6 +29,15 @@ class Url(Resource):
             'redirects':RedirectsField(attribute='redirects'),
             'created_at':fields.String(attribute='url.created_time')
         }
+        self.url_field = {
+            'id':fields.Integer(attribute='url.id'),
+            'group_name':fields.String(attribute='url.group_name', default=None),
+            'group_path':fields.String(attribute='url.group_path', default=None),
+            'path':fields.String(attribute='url.path'),
+            'short_path':fields.String(attribute='url.short_path'),
+            'created_at':fields.String(attribute='url.created_time')
+        }
+
         self.method_decorators = [authenticate]
 
     def get(self, url_id):
@@ -46,23 +55,21 @@ class Url(Resource):
 
         data = {'url':url, 'redirects':url.redirects}
 
-        return marshal(data, self.url_field, envelope='data')
+        return marshal(data, self.url_all_field, envelope='data')
 
     
     def patch(self, url_id):
-        self.parser.add_argument('url', type=url_validator, required=True,
-        help='url is invalid')
+        self.parser.add_argument('url', type=url_validator, required=True, help='url is invalid')
         args = self.parser.parse_args()
 
-        url = UrlModel.query.filter((UrlModel.id == url_id) 
-        & (UrlModel.user_id == g.user.id)).first()
+        url = UrlModel.query.filter((UrlModel.id == url_id) & (UrlModel.user_id == g.user.id)).first()
 
         if url is None:
             return {'error':{'message':'shortened url does not exist'}}, 404
 
         url.path = args['url']
         db.session.commit()
-        data = {'url':url, 'redirects':url.redirects}
+        data = {'url':url}
         
         return marshal(data, self.url_field, envelope='data')
 

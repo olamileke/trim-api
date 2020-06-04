@@ -43,13 +43,7 @@ class Users(Resource):
         return marshal(new_user, user_field, envelope='data'), 201
 
     def patch(self):
-        image = request.files['image']
-
-        if image.filename == '':
-            return {'error':{'message':'upload a valid image'}}
-
-        return {'image':image.filename}
-
+        pass
 
     def generate_default_user_image(self):
         avatar_path = path.join(current_app.config['BASE_DIR'], 'images', 'users', 'anon.png')

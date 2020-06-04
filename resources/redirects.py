@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse, fields, marshal
-from flask import g, current_app
+from flask import g, current_app, request
 from utilities.validators import shortened_link, redirect_source
 from utilities.middlewares import authenticate
 from models import db, Redirect, Url
@@ -8,15 +8,44 @@ class Redirects(Resource):
     def __init__(self):
         self.method_decorators = [authenticate]
         self.parser = reqparse.RequestParser()
-        self.redirect_field = {
+        self.url_field = {
             'path':fields.String(attribute='path')
         }
+        self.redirect_field = {
+            'source':fields.String(attribute='source'),
+            'created_at':fields.String(attribute='created_time')
+        }
+
+    def get(self):
+        page = request.args.get('page')
+        group_id = request.args.get('group_id')
+
+        if page is None:
+            page = 1
+        
+        start = (int(page) - 1) * current_app.config['PER_PAGE']
+        stop = int(page) * current_app.config['PER_PAGE']
+
+        if group_id is not None:
+            redirects = Redirect.query.filter((Redirect.user_id == g.user.id) & (Redirect.group_id == group_id)).order_by(Redirect.created_at.desc())[start:stop]
+        else:
+            redirects = Redirect.query.filter((Redirect.user_id == g.user.id)).order_by(Redirect.created_at.desc())[start:stop]
+
+        total_redirects = Redirect.query.filter((Redirect.user_id == g.user.id)).count()
+
+        for redirect in redirects:
+            redirect.created_time = redirect.created_at.strftime('%B %d, %Y %H:%M')
+
+        redirects_data = marshal(redirects, self.redirect_field)
+
+        data = {'redirects':redirects_data, 'total_redirects':total_redirects}
+
+        return {'data':data}
+
 
     def post(self):
-        self.parser.add_argument('short_path', required=True, type=str,
-        help='short link must be a string')
-        self.parser.add_argument('source', required=True, type=redirect_source,
-        help='redirect source must be a valid url')
+        self.parser.add_argument('short_path', required=True, type=str,help='short link must be a string')
+        self.parser.add_argument('source', required=True, type=redirect_source, help='redirect source must be a valid url')
 
         args = self.parser.parse_args()
 
@@ -37,7 +66,7 @@ class Redirects(Resource):
             db.session.add(redirect)
             db.session.commit()
 
-        return marshal(url, self.redirect_field, envelope='data'), 201
+        return marshal(url, self.url_field, envelope='data'), 201
 
 
 

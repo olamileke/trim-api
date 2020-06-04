@@ -36,15 +36,23 @@ class Group(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
         self.method_decorators = [authenticate]
-        self.groupField = {
-            'id':fields.Integer(attribute='id'),
-            'name':fields.String(attribute='name'),
-            'url':fields.String(attribute='path'),
+        self.group_all_field = {
+            'id':fields.Integer(attribute='group.id'),
+            'name':fields.String(attribute='group.name'),
+            'url':fields.String(attribute='group.path'),
             'redirects':RedirectsField(attribute='redirects'),
-            'created_at':fields.String(default=None, attribute='created_time'),
+            'created_at':fields.String(default=None, attribute='group.created_time'),
             'urls':UrlField(attribute='urls'),
-            'total_urls':fields.Integer(attribute='total_urls'),
-            'total_redirects':fields.Integer(attribute='total_redirects')
+            'num_urls':fields.Integer(attribute='total_urls'),
+            'num_redirects':fields.Integer(attribute='total_redirects')
+        }
+        self.group_field = {
+            'id':fields.Integer(attribute='group.id'),
+            'name':fields.String(attribute='group.name'),
+            'url':fields.String(attribute='group.path'),
+            # 'num_urls':fields.Integer(attribute='total_urls'),
+            # 'num_redirects':fields.Integer(attribute='total_redirects'),
+            'created_at':fields.String(default=None, attribute='group.created_time')
         }
 
     def get(self, group_id):
@@ -58,22 +66,17 @@ class Group(Resource):
         urls = group.urls
         redirects = group.redirects
 
-        data = { 'id':group.id, 'name':group.name, 
-        'path':group.path, 'created_time':group.created_at.strftime('%B %d, %Y %H:%M'),
-        'urls':urls[0:stop] ,'redirects':redirects,
-        'total_urls':len(urls), 'total_redirects':len(redirects) }
-
-        return marshal(data, self.groupField, envelope='data')
+        data = {'group':group,'urls':urls[0:stop] ,'redirects':redirects[0:stop], 'total_urls':len(urls),
+        'total_redirects':len(redirects)}
+        
+        return marshal(data, self.group_all_field, envelope='data')
 
     def patch(self, group_id):
-        self.parser.add_argument('name', type=group_name,
-        required=True, help='name must be at least 5 characters')
-        self.parser.add_argument('url', type=url_validator, required=True,
-        help='url is invalid')
+        self.parser.add_argument('name', type=group_name, required=True, help='name must be at least 5 characters')
+        self.parser.add_argument('url', type=url_validator, required=True, help='url is invalid')
 
         args = self.parser.parse_args() 
-        group = GroupModel.query.filter((GroupModel.id == group_id)
-        & (GroupModel.user_id == g.user.id)).first()
+        group = GroupModel.query.filter((GroupModel.id == group_id) & (GroupModel.user_id == g.user.id)).first()
 
         if group is None:
             return {'error':{'message':'group does not exist'}}, 404
@@ -86,13 +89,10 @@ class Group(Resource):
             url.path = url.path.replace(old_group_path, args['url'])
 
         db.session.commit()
+        group.created_time = group.created_at.strftime('%B %d, %Y %H:%M')
+        data = {'group':group}
 
-        data = {'id':group.id, 'name':group.name, 
-        'path':group.path, 'num_urls':len(group.urls),
-        'created_time':group.created_at,'urls':group.urls,'redirects':group.redirects}
-
-        return marshal(data, self.groupField, envelope='data')
-
+        return marshal(data, self.group_field, envelope='data')
 
 
     def delete(self, group_id):

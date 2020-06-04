@@ -19,32 +19,9 @@ class Urls(Resource):
         }
         self.method_decorators = [authenticate]
 
-    def post(self):
-        self.parser.add_argument('url', type=url_validator, required=True, 
-        help='url is invalid')
-        self.parser.add_argument('length', type=int, required=True,
-        help='specify a valid length between 6-10')
-        self.parser.add_argument('group', type=url_group, required=True,
-        help='invalid group id', dest='group_id')
-
-        args = self.parser.parse_args()
-
-        url = Url.query.filter((Url.path == args['url']) & 
-        (Url.user_id == g.user.id)).first()
-
-        if url is not None:
-            message = '{0} has been shortened'.format(args['url'])
-            return {'error':{'message':message}}, 403
-
-        url = Url(group_id=args['group_id'], user_id=g.user.id,
-        path=args['url'], short_path=self.shorten(args['length']))
-        db.session.add(url)
-        db.session.commit()
-
-        return marshal(url, self.urlField, envelope='data'), 201
-
     def get(self):
         page = request.args.get('page')
+        group_id = request.args.get('group_id')
 
         if page is None:
             page = 1
@@ -53,7 +30,11 @@ class Urls(Resource):
         start = (int(page) - 1) * per_page
         stop = int(page) * per_page
 
-        urls = Url.query.filter((Url.user_id == g.user.id)).order_by(Url.created_at.desc())[start:stop]
+        if group_id is not None:
+            urls = Url.query.filter((Url.user_id == g.user.id) & (Url.group_id == group_id)).order_by(Url.created_at.desc())[start:stop]
+        else:
+            urls = Url.query.filter((Url.user_id == g.user.id)).order_by(Url.created_at.desc())[start:stop]
+
         total_urls = Url.query.filter((Url.user_id == g.user.id)).count()
 
         for url in urls:
@@ -64,6 +45,25 @@ class Urls(Resource):
         data = {'total_urls':total_urls, 'urls':urls_data}
 
         return {'data':data}
+
+    def post(self):
+        self.parser.add_argument('url', type=url_validator, required=True, help='url is invalid')
+        self.parser.add_argument('length', type=int, required=True, help='specify a valid length between 6-10')
+        self.parser.add_argument('group', type=url_group, required=True, help='invalid group id', dest='group_id')
+
+        args = self.parser.parse_args()
+
+        url = Url.query.filter((Url.path == args['url']) & (Url.user_id == g.user.id)).first()
+
+        if url is not None:
+            message = '{0} has been shortened'.format(args['url'])
+            return {'error':{'message':message}}, 403
+
+        url = Url(group_id=args['group_id'], user_id=g.user.id, path=args['url'], short_path=self.shorten(args['length']))
+        db.session.add(url)
+        db.session.commit()
+
+        return marshal(url, self.urlField, envelope='data'), 201
 
     def shorten(self, length=6):
         characters = string.ascii_letters + string.digits
