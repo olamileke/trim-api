@@ -48,7 +48,6 @@ class Urls(Resource):
 
     def post(self):
         self.parser.add_argument('url', type=url_validator, required=True, help='url is invalid')
-        self.parser.add_argument('length', type=int, required=True, help='specify a valid length between 6-10')
         self.parser.add_argument('group', type=url_group, required=True, help='invalid group id', dest='group_id')
 
         args = self.parser.parse_args()
@@ -59,7 +58,9 @@ class Urls(Resource):
             message = '{0} has been shortened'.format(args['url'])
             return {'error':{'message':message}}, 403
 
-        url = Url(group_id=args['group_id'], user_id=g.user.id, path=args['url'], short_path=self.shorten(args['length']))
+        length = random.randint(5, 8)
+
+        url = Url(group_id=args['group_id'], user_id=g.user.id, path=args['url'], short_path=self.shorten(length))
         db.session.add(url)
         db.session.commit()
 

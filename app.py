@@ -9,6 +9,7 @@ from resources.urls import Urls
 from resources.url import Url
 from resources.group import Group
 from resources.redirects import Redirects
+from resources.stats import Stats
 import config
 import os
 
@@ -41,6 +42,7 @@ api.add_resource(Group, '/groups/<int:group_id>')
 api.add_resource(Urls, '/urls')
 api.add_resource(Url, '/urls/<int:url_id>')
 api.add_resource(Redirects, '/redirects')
+api.add_resource(Stats, '/stats')
 
 if __name__ == '__main__':
     app.run()

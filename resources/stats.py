@@ -1,0 +1,71 @@
+from flask_restful import Resource, fields, marshal
+from flask import g
+from models import db, Redirect, Url, Group
+from utilities.middlewares import authenticate
+from datetime import date, timedelta
+
+class Stats(Resource):
+    def __init__(self):
+        self.method_decorators = [ authenticate ]
+        self.redirect_field = {
+            'source':fields.String(attribute='source'),
+            'created_at':fields.String(attribute='created_time')
+        }
+
+    def get(self):
+        totals = self.totals(g.user.id)
+        redirect_stats = self.redirect_stats(g.user.id)
+        url_stats = self.url_stats(g.user.id)
+        redirects = self.get_redirects(g.user.id)
+        data = {'totals':totals, 'redirect_stats':redirect_stats, 'url_stats':url_stats, 'redirects':redirects}
+
+        return {'data':data}
+
+    
+    def url_stats(self, user_id):
+        urls = Url.query.filter((Url.user_id == user_id)).all()
+        data = {}
+        lengths = [len(url.redirects) for url in urls]
+        lengths.sort()
+        lengths.reverse()
+
+        for i in range(0, 5):
+            for url in urls:
+                if len(url.redirects) == lengths[0]:
+                    data[url.short_path] = lengths[0]
+                    del lengths[0]
+                    break
+
+        return data
+
+    def get_redirects(self, user_id):
+        redirects = Redirect.query.filter((Redirect.user_id == user_id))[:3]
+
+        for redirect in redirects:
+            redirect.created_time = redirect.created_at.strftime('%B %d, %Y %H:%M')
+
+        return marshal(redirects, self.redirect_field)
+
+    
+    def redirect_stats(self, user_id):
+        last_week_date = date.today() - timedelta(days=7)
+        start = last_week_date
+        redirects = Redirect.query.filter((Redirect.user_id == user_id) & (Redirect.created_at >= last_week_date)).all()
+        data = {}
+        dates = [redirect.created_at.date() for redirect in redirects]
+        count = 7
+
+        while count >= 1:
+            dt = start + timedelta(days=count)
+            day = dt.strftime('%a')
+            data[day] = dates.count(dt)
+            count = count - 1
+
+        return data
+
+    def totals(self, user_id):
+        total_groups = Group.query.filter((Group.user_id == user_id)).count()
+        total_urls = Url.query.filter((Url.user_id == user_id)).count()
+        total_redirects = Redirect.query.filter((Redirect.user_id == user_id)).count()
+
+        return {'groups':total_groups, 'urls':total_urls, 'redirects':total_redirects}
