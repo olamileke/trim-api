@@ -8,7 +8,7 @@ class Stats(Resource):
     def __init__(self):
         self.method_decorators = [ authenticate ]
         self.redirect_field = {
-            'source':fields.String(attribute='source'),
+            'url':fields.String(attribute='url.short_path'),
             'created_at':fields.String(attribute='created_time')
         }
 
@@ -20,7 +20,6 @@ class Stats(Resource):
         data = {'totals':totals, 'redirect_stats':redirect_stats, 'url_stats':url_stats, 'redirects':redirects}
 
         return {'data':data}
-
     
     def url_stats(self, user_id):
         urls = Url.query.filter((Url.user_id == user_id)).all()
@@ -28,25 +27,29 @@ class Stats(Resource):
         lengths = [len(url.redirects) for url in urls]
         lengths.sort()
         lengths.reverse()
+        count = 5
 
-        for i in range(0, 5):
+        if len(urls) < 5:
+            count = len(urls)
+
+        for i in range(0, count):
             for url in urls:
                 if len(url.redirects) == lengths[0]:
                     data[url.short_path] = lengths[0]
-                    del lengths[0]
+                    lengths.remove(lengths[0])
+                    urls.remove(url)
                     break
 
         return data
 
     def get_redirects(self, user_id):
-        redirects = Redirect.query.filter((Redirect.user_id == user_id))[:3]
+        redirects = Redirect.query.filter((Redirect.user_id == user_id)).order_by(Redirect.created_at.desc())[:3]
 
         for redirect in redirects:
             redirect.created_time = redirect.created_at.strftime('%B %d, %Y %H:%M')
 
         return marshal(redirects, self.redirect_field)
 
-    
     def redirect_stats(self, user_id):
         last_week_date = date.today() - timedelta(days=7)
         start = last_week_date

@@ -52,7 +52,6 @@ class Redirect(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     url_id = db.Column(db.Integer, db.ForeignKey('urls.id'), nullable=False)
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=True)
-    source = db.Column(db.String(400), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 
