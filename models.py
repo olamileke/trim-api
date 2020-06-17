@@ -11,6 +11,7 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     avatar = db.Column(db.String(255), nullable=True)
+    activation_token = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     groups = db.relationship('Group', backref=db.backref('user', lazy=True), lazy=True)

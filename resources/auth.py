@@ -18,22 +18,18 @@ class Auth(Resource):
         }
 
     def post(self):
-        self.parser.add_argument('email', type=email, required=True,
-        help='valid email is required')
-        self.parser.add_argument('password', type=password, required=True,
-        help='password must be at least 8 characters')
-
+        self.parser.add_argument('email', type=email, required=True, help='valid email is required')
+        self.parser.add_argument('password', type=password, required=True, help='password must be at least 8 characters')
         args = self.parser.parse_args()
 
         user = User.query.filter((User.email == args['email'])).first()
 
-        if user is None:
+        if user is None or user.activation_token is not None:
             return {'error':{'message':'Incorrect email or password'}}, 404
         
         if check_password_hash(user.password, args['password']) == False:
             return {'error':{'message':'Incorrect email or password'}}, 404
 
-    
         data = {'avatar':encode(user.avatar), 'token':generate_token(user.id), 'user':user}
 
         return marshal(data, self.field, envelope='data')
