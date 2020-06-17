@@ -1,10 +1,11 @@
 from flask_restful import Resource, reqparse, fields, marshal
 from flask import current_app, request, g
 from werkzeug.security import generate_password_hash
-from models import db, User
+from models import db, User, PasswordReset
 from utilities.validators import email, password
 from utilities.middlewares import authenticate
 from utilities.mail import send_activate_mail
+from datetime import datetime
 from os import path
 import random
 import string
@@ -24,13 +25,9 @@ class Users(Resource):
         # self.method_decorators = {'patch':[authenticate]}
 
     def post(self):
-        self.parser.add_argument('name', type=str, required=True,
-        help='name is required')
-        self.parser.add_argument('email', type=email, required=True,
-        help='valid email is required')
-        self.parser.add_argument('password', type=password, required=True,
-        help='password must be at least 8 characters')
-
+        self.parser.add_argument('name', type=str, required=True, help='name is required')
+        self.parser.add_argument('email', type=email, required=True, help='valid email is required')
+        self.parser.add_argument('password', type=password, required=True, help='password must be at least 8 characters')
         args = self.parser.parse_args()
 
         user = User.query.filter((User.email == args['email'])).first()
@@ -48,24 +45,53 @@ class Users(Resource):
         db.session.commit()
         return marshal(new_user, user_field, envelope='data'), 201
 
+
     def patch(self):
-        operation = request.args.get('field')
-        if operation is None:
+        field = request.args.get('field')
+        if field is None:
             return {'error':{'message':'patch operation to be carried out is unknown'}}, 400
 
-        if operation == 'activation_token':
-            self.parser.add_argument('token', type=str, required=True, help='activation token is required')
-            args = self.parser.parse_args()
-            user = User.query.filter((User.activation_token == args['token'])).first()
+        if field == 'activation_token':
+            return self.activate()
 
-            if user is None:
-                return {'error':{'message':'invalid activation token'}}, 400
+        if field == 'password':
+            return self.change_password()
 
-            user.activation_token = None
-            db.session.commit()
-
-            return marshal(user, user_field, envelope='data')
             
+    def change_password(self):
+        self.parser.add_argument('password', type=password, required=True, help='password must be at least 8 characters')
+        self.parser.add_argument('token', type=str, required=True, help='password reset token is required')
+        args = self.parser.parse_args()
+
+        reset = PasswordReset.query.filter((PasswordReset.token == args['token'])).first()
+
+        if reset is None:
+            return {'error':{'message':'invalid reset token'}}, 400
+        
+        if datetime.now() > reset.expires_at:
+            return {'error':{'message':'expired reset token'}}, 400
+
+        user = User.query.filter((User.id == reset.user_id)).first()
+        user.password = generate_password_hash(args['password'])
+        db.session.delete(reset)
+        db.session.commit()
+
+        return {'data':{'message':'password changed successfully'}}
+
+    
+    def activate(self):
+        self.parser.add_argument('token', type=str, required=True, help='activation token is required')
+        args = self.parser.parse_args()
+        user = User.query.filter((User.activation_token == args['token'])).first()
+
+        if user is None:
+            return {'error':{'message':'invalid activation token'}}, 400
+
+        user.activation_token = None
+        db.session.commit()
+
+        return marshal(user, user_field, envelope='data')
+
 
     def generate_default_user_image(self):
         avatar_path = path.join(current_app.config['BASE_DIR'], 'images', 'users', 'anon.png')
