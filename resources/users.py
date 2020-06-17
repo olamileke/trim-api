@@ -49,11 +49,11 @@ class Users(Resource):
         return marshal(new_user, user_field, envelope='data'), 201
 
     def patch(self):
-        operation = request.args.get('type')
+        operation = request.args.get('field')
         if operation is None:
             return {'error':{'message':'patch operation to be carried out is unknown'}}, 400
 
-        if operation == 'activate':
+        if operation == 'activation_token':
             self.parser.add_argument('token', type=str, required=True, help='activation token is required')
             args = self.parser.parse_args()
             user = User.query.filter((User.activation_token == args['token'])).first()

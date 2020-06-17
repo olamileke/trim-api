@@ -6,7 +6,7 @@ from models import db, Redirect, Url
 
 class Redirects(Resource):
     def __init__(self):
-        self.method_decorators = [authenticate]
+        self.method_decorators = {'get':authenticate}
         self.parser = reqparse.RequestParser()
         self.url_field = {
             'path':fields.String(attribute='path')

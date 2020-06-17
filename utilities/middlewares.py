@@ -8,8 +8,6 @@ def authenticate(method):
     def middleware(*args, **kwargs):
         token = request.headers.get('Authorization').split(' ')[1]
 
-        print(token)
-
         if token is None:
             return {'error':{'message':'Authentication failed'}}, 401
 
