@@ -6,7 +6,7 @@ from models import db, Redirect, Url
 
 class Redirects(Resource):
     def __init__(self):
-        self.method_decorators = {'get':authenticate}
+        self.method_decorators = {'get':[authenticate]}
         self.parser = reqparse.RequestParser()
         self.url_field = {
             'path':fields.String(attribute='path')
@@ -59,7 +59,7 @@ class Redirects(Resource):
         else:
             group_id = url.group_id
 
-        redirect = Redirect(user_id=g.user.id, url_id=url.id, group_id=group_id)
+        redirect = Redirect(user_id=url.user.id, url_id=url.id, group_id=group_id)
 
         db.session.add(redirect)
         db.session.commit()

@@ -25,10 +25,10 @@ class Auth(Resource):
         user = User.query.filter((User.email == args['email'])).first()
 
         if user is None or user.activation_token is not None:
-            return {'error':{'message':'Incorrect email or password'}}, 404
+            return {'message':'Incorrect email or password'}, 404
         
         if check_password_hash(user.password, args['password']) == False:
-            return {'error':{'message':'Incorrect email or password'}}, 404
+            return {'message':'Incorrect email or password'}, 404
 
         data = {'avatar':encode(user.avatar), 'token':generate_token(user.id), 'user':user}
 
