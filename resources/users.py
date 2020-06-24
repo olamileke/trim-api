@@ -26,7 +26,6 @@ class Users(Resource):
         }
         self.allowed_extensions = ['jpg', 'jpeg', 'png']
         
-
     def post(self):
         self.parser.add_argument('name', type=str, required=True, help='name is required')
         self.parser.add_argument('email', type=email, required=True, help='valid email is required')
@@ -36,7 +35,7 @@ class Users(Resource):
         user = User.query.filter((User.email == args['email'])).first()
 
         if user:
-            return {'error':{'message':'User with email exists'}}, 403
+            return {'message':'User with email exists'}, 403
 
         avatar_path = self.generate_default_user_image()
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 100)).lower()
@@ -49,11 +48,10 @@ class Users(Resource):
         data = {'user':new_user, 'avatar':encode(new_user.avatar)}
         return marshal(data, self.user_field, envelope='data'), 201
 
-
     def patch(self):
         field = request.args.get('field')
         if field is None:
-            return {'error':{'message':'patch operation to be carried out is unknown'}}, 400
+            return {'message':'patch operation to be carried out is unknown'}, 400
 
         if field == 'avatar':
             return self.change_avatar()
@@ -90,10 +88,6 @@ class Users(Resource):
 
         return marshal(data, self.user_field, envelope='data')
 
-
-
-
-            
     def change_password(self):
         self.parser.add_argument('password', type=password, required=True, help='password must be at least 8 characters')
         self.parser.add_argument('token', type=str, required=True, help='password reset token is required')
@@ -114,7 +108,6 @@ class Users(Resource):
 
         return {'data':{'message':'password changed successfully'}}
 
-    
     def activate(self):
         self.parser.add_argument('token', type=str, required=True, help='activation token is required')
         args = self.parser.parse_args()
@@ -126,8 +119,8 @@ class Users(Resource):
         user.activation_token = None
         db.session.commit()
 
-        return marshal(user, user_field, envelope='data')
-
+        data = {'user':user, 'avatar':encode(user.avatar)}
+        return marshal(data, self.user_field, envelope='data')
 
     def generate_default_user_image(self):
         avatar_path = path.join(current_app.config['BASE_DIR'], 'images', 'users', 'anon.png')

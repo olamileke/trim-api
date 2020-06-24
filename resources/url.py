@@ -44,7 +44,7 @@ class Url(Resource):
         url = UrlModel.query.filter((UrlModel.id == url_id) &
         (UrlModel.user_id == g.user.id)).first()
         if url is None:
-            return {'error':{'message':'shortened url does not exist'}}, 404
+            return {'message':'shortened url does not exist'}, 404
 
         url.created_time = url.created_at.strftime('%B %d, %Y %H:%M')
         url.group_name = None
@@ -62,14 +62,19 @@ class Url(Resource):
         self.parser.add_argument('url', type=url_validator, required=True, help='url is invalid')
         args = self.parser.parse_args()
 
-        url = UrlModel.query.filter((UrlModel.id == url_id) & (UrlModel.user_id == g.user.id)).first()
+        url_to_patch = UrlModel.query.filter((UrlModel.id == url_id) & (UrlModel.user_id == g.user.id)).first()
 
-        if url is None:
-            return {'error':{'message':'shortened url does not exist'}}, 404
+        if url_to_patch is None:
+            return {'message':'shortened url does not exist'}, 404
 
-        url.path = args['url']
+        url = UrlModel.query.filter((UrlModel.user_id == g.user.id) & (UrlModel.path == args['url'])).first()
+
+        if url is not None and url.id != url_to_patch.id:
+            return {'message':'url has been shortened already'}, 403
+
+        url_to_patch.path = args['url']
         db.session.commit()
-        data = {'url':url}
+        data = {'url':url_to_patch}
         
         return marshal(data, self.url_field, envelope='data')
 
@@ -78,7 +83,7 @@ class Url(Resource):
         (UrlModel.user_id == g.user.id)).first()
 
         if url is None:
-            return {'error':{'message':'shortened url does not exist'}}, 404
+            return {'message':'shortened url does not exist'}, 404
 
         db.session.delete(url)
         db.session.commit()

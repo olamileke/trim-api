@@ -56,7 +56,7 @@ class Urls(Resource):
 
         if url is not None:
             message = '{0} has been shortened'.format(args['url'])
-            return {'error':{'message':message}}, 403
+            return {'message':message}, 403
 
         length = random.randint(5, 8)
 

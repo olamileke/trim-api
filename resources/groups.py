@@ -54,13 +54,13 @@ class Groups(Resource):
 
         if group is not None:
             message = 'group with {0} name exists already'.format(name)
-            return {'error':{'message':message}}, 403
+            return {'message':message}, 403
 
         group = Group.query.filter((Group.path == args['url']) & (Group.user_id == g.user.id)).first()
 
         if group is not None:
             message = 'group with {0} url exists already'.format(args['url'])
-            return {'error':{'message':message}}, 403
+            return {'message':message}, 403
 
         group = Group(name=name, path=args['url'], user_id=g.user.id)
         db.session.add(group)

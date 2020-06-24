@@ -60,7 +60,7 @@ class Group(Resource):
         & (GroupModel.user_id == g.user.id)).first()
 
         if group is None:
-            return {'error':{'message':'group does not exist'}}, 404
+            return {'message':'group does not exist'}, 404
 
         stop = current_app.config['PER_PAGE']
         urls = group.urls
@@ -76,33 +76,44 @@ class Group(Resource):
         self.parser.add_argument('url', type=url_validator, required=True, help='url is invalid')
 
         args = self.parser.parse_args() 
-        group = GroupModel.query.filter((GroupModel.id == group_id) & (GroupModel.user_id == g.user.id)).first()
+        group_to_patch = GroupModel.query.filter((GroupModel.id == group_id) & (GroupModel.user_id == g.user.id)).first()
 
-        if group is None:
-            return {'error':{'message':'group does not exist'}}, 404
+        if group_to_patch is None:
+            return {'message':'group does not exist'}, 404
 
-        old_group_path = group.path
-        group.name = args['name']
-        group.path = args['url']
+        group = GroupModel.query.filter((GroupModel.name == args['name']) & (GroupModel.user_id == g.user.id)).first()
 
-        for url in group.urls:
+        if group is not None and group.id != group_to_patch.id: 
+            message = 'group with {0} name exists already'.format(args['name'])
+            return {'message':message}, 403
+
+        group = GroupModel.query.filter((GroupModel.path == args['url']) & (GroupModel.user_id == g.user.id)).first()
+
+        if group is not None and group.id != group_to_patch.id:
+            message = 'group with {0} url exists already'.format(args['url'])
+            return {'message':message}, 403
+
+        old_group_path = group_to_patch.path
+        group_to_patch.name = args['name']
+        group_to_patch.path = args['url']
+
+        for url in group_to_patch.urls:
             url.path = url.path.replace(old_group_path, args['url'])
 
         db.session.commit()
-        group.created_time = group.created_at.strftime('%B %d, %Y %H:%M')
-        data = {'group':group}
+        group_to_patch.created_time = group_to_patch.created_at.strftime('%B %d, %Y %H:%M')
+        data = {'group':group_to_patch}
 
         return marshal(data, self.group_field, envelope='data')
-
 
     def delete(self, group_id):
         group = GroupModel.query.filter((GroupModel.id == group_id)
         & (GroupModel.user_id == g.user.id)).first()
 
         if group is None:
-            return {'error':{'message':'group does not exist'}}, 404
+            return {'message':'group does not exist'}, 404
 
         db.session.delete(group)
         db.session.commit()
 
-        return {'data':{'message':'group deleted successfully'}}, 204 
+        return {'message':'group deleted successfully'}, 204 

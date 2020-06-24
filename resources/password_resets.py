@@ -15,7 +15,7 @@ class PasswordResets(Resource):
         action = request.args.get('action')
 
         if action is None:
-            return {'error':{'message':'action to be carried out is unknown'}}, 400
+            return {'message':'action to be carried out is unknown'}, 400
         
         if action == 'mail':
             return self.mail()
@@ -23,7 +23,7 @@ class PasswordResets(Resource):
         if action == 'verify':
             return self.verify()
 
-        return {'error':{'message':'action to be carried out is unknown'}}, 400
+        return {'message':'action to be carried out is unknown'}, 400
         
     def mail(self):
         self.parser.add_argument('email', type=email, required=True, help='email is required')
@@ -32,7 +32,7 @@ class PasswordResets(Resource):
         user = User.query.filter((User.email == args['email'])).first()
 
         if user is None:
-            return {'error':{'message':'User does not exist'}}, 404
+            return {'message':'User does not exist'}, 404
 
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 100)).lower()
         expiry = datetime.now() + timedelta(minutes=30)
@@ -51,11 +51,11 @@ class PasswordResets(Resource):
         reset = PwReset.query.filter((PwReset.token == args['token'])).first()
 
         if reset is None:
-            return {'error':{'message':'invalid password reset token'}}, 400
+            return {'message':'invalid password reset token'}, 400
 
         if datetime.now() > reset.expires_at:
             db.session.delete(reset)
-            return {'error':{'message':'expired password reset token'}}, 400
+            return {'message':'expired password reset token'}, 400
 
         db.session.commit()
         return {'data':{'message':'valid password reset token'}}

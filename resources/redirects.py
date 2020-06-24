@@ -43,26 +43,26 @@ class Redirects(Resource):
 
         return {'data':data}
 
-
     def post(self):
         self.parser.add_argument('short_path', required=True, type=str,help='short link must be a string')
+        self.parser.add_argument('referrer', required=True, type=str, help='referrer is required');
 
         args = self.parser.parse_args()
 
         url = Url.query.filter((Url.short_path == args['short_path'])).first()
 
         if url is None:
-            return {'error':{'message':'Short link does not exist'}}, 404
+            return {'message':'Short link does not exist'}, 404
 
         if url.group_id is None:
             group_id = None
         else:
             group_id = url.group_id
 
-        redirect = Redirect(user_id=url.user.id, url_id=url.id, group_id=group_id)
-
-        db.session.add(redirect)
-        db.session.commit()
+        if current_app.config['CLIENT_URL'] not in args['referrer']:
+            redirect = Redirect(user_id=url.user.id, url_id=url.id, group_id=group_id)
+            db.session.add(redirect)
+            db.session.commit()
 
         return marshal(url, self.url_field, envelope='data'), 201
 
