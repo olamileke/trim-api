@@ -65,10 +65,11 @@ class Group(Resource):
         stop = current_app.config['PER_PAGE']
         urls = group.urls
         redirects = group.redirects
+        group.created_time = group.created_at.strftime('%B %d, %Y %H:%M')
 
         data = {'group':group,'urls':urls[0:stop] ,'redirects':redirects[0:stop], 'total_urls':len(urls),
         'total_redirects':len(redirects)}
-        
+
         return marshal(data, self.group_all_field, envelope='data')
 
     def patch(self, group_id):
