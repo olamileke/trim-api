@@ -47,12 +47,12 @@ class Groups(Resource):
     def post(self):
         self.parser.add_argument('name', type=group_name, required=True, help='name must be at least 5 characters')
         self.parser.add_argument('url', type=url_validator, required=True, help='url is invalid')
-
+ 
         args = self.parser.parse_args()
         name = args['name'].lower()
         group = Group.query.filter((Group.name == name) & (Group.user_id == g.user.id)).first()
 
-        if group is not None:
+        if group is not None:  
             message = 'group with {0} name exists already'.format(name)
             return {'message':message}, 403
 

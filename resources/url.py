@@ -10,7 +10,8 @@ class RedirectsField(fields.Raw):
 
         for redirect in redirects:
             data = {}
-            data['url'] = redirect.url.short_path
+            data['short_url'] = redirect.url.short_path
+            data['url'] = redirect.url.path
             data['created_at'] = redirect.created_at.strftime('%B %d, %Y %H:%M')
 
             response.append(data)

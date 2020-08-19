@@ -8,7 +8,8 @@ class Stats(Resource):
     def __init__(self):
         self.method_decorators = [ authenticate ]
         self.redirect_field = {
-            'url':fields.String(attribute='url.short_path'),
+            'short_url':fields.String(attribute='url.short_path'),
+            'url':fields.String(attribute='url.path'),
             'created_at':fields.String(attribute='created_time')
         }
 

@@ -1,6 +1,6 @@
 from flask_restful import Resource, marshal, fields, reqparse
 from flask import g, current_app, request
-from utilities.validators import url as url_validator, url_group
+from utilities.validators import url as url_validator, url_group, short_url
 from utilities.middlewares import authenticate
 from models import db, Url
 import random
@@ -49,6 +49,7 @@ class Urls(Resource):
     def post(self):
         self.parser.add_argument('url', type=url_validator, required=True, help='url is invalid')
         self.parser.add_argument('group', type=url_group, required=True, help='invalid group id', dest='group_id')
+        self.parser.add_argument('short_url', type=short_url, help='short url must be at least 3 characters in length')
 
         args = self.parser.parse_args()
 
@@ -60,16 +61,35 @@ class Urls(Resource):
 
         length = random.randint(5, 8)
 
-        url = Url(group_id=args['group_id'], user_id=g.user.id, path=args['url'], short_path=self.shorten(length))
+        if args['short_url'] == '':
+            short_path = self.shorten(length, g.user.id)
+        else:
+            short_path = args['short_url']
+            url = Url.query.filter((Url.short_path == short_path)).first()
+
+            if url is not None:
+                message = '{0} is not available'.format(short_path)
+                return {'message':message}, 403
+
+        url = Url(group_id=args['group_id'], user_id=g.user.id, path=args['url'], short_path=short_path)
         db.session.add(url)
         db.session.commit()
 
         return marshal(url, self.urlField, envelope='data'), 201
 
-    def shorten(self, length=6):
-        characters = string.ascii_letters + string.digits
-        short_path = ''.join(random.sample(characters, length))
-        return short_path
+    def shorten(self, length, user_id):
+        i = 0
+
+        while i < 1:
+            characters = string.ascii_letters + string.digits
+            short_path = ''.join(random.sample(characters, length))
+
+            url = Url.query.filter((Url.short_path == short_path)).first()
+            if url is None:
+                i = i + 1
+
+        return short_path        
+
 
         
     

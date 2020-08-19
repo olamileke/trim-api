@@ -19,6 +19,16 @@ def url_group(value):
 
     raise ValueError('Invalid group')
 
+def short_url(value):
+    value = value.strip()
+    if value == '':
+        return value
+
+    if len(value) < 3:
+        raise ValueError('short url must be at least 3 characters')
+
+    return value
+
 def url(value):
     url_match = re.compile('.*http.*')
 

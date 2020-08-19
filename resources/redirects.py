@@ -9,10 +9,11 @@ class Redirects(Resource):
         self.method_decorators = {'get':[authenticate]}
         self.parser = reqparse.RequestParser()
         self.url_field = {
-            'path':fields.String(attribute='path')
+            'path':fields.String(attribute='path') 
         }
         self.redirect_field = {
-            'url':fields.String(attribute='url.short_path'),
+            'short_url':fields.String(attribute='url.short_path'),
+            'url':fields.String(attribute='url.path'),
             'created_at':fields.String(attribute='created_time')
         }
 
