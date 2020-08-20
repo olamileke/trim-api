@@ -41,6 +41,7 @@ class Url(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     path = db.Column(db.String(400), nullable=False)
     short_path = db.Column(db.String(100), nullable=False)
+    custom = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     redirects = db.relationship('Redirect', cascade='all, delete-orphan', backref=db.backref('url', lazy=True), lazy=True)

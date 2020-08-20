@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse, fields, marshal
 from flask import g
 from utilities.middlewares import authenticate
-from utilities.validators import url as url_validator
+from utilities.validators import url as url_validator, short_url
 from models import db, Url as UrlModel
 
 class RedirectsField(fields.Raw):
@@ -27,6 +27,7 @@ class Url(Resource):
             'group_path':fields.String(attribute='url.group_path', default=None),
             'path':fields.String(attribute='url.path'),
             'short_path':fields.String(attribute='url.short_path'),
+            'custom':fields.Boolean(attribute='url.custom'),
             'redirects':RedirectsField(attribute='redirects'),
             'created_at':fields.String(attribute='url.created_time')
         }
@@ -36,6 +37,7 @@ class Url(Resource):
             'group_path':fields.String(attribute='url.group_path', default=None),
             'path':fields.String(attribute='url.path'),
             'short_path':fields.String(attribute='url.short_path'),
+            'custom':fields.Boolean(attribute='url.custom'),
             'created_at':fields.String(attribute='url.created_time')
         }
 
@@ -61,6 +63,7 @@ class Url(Resource):
     
     def patch(self, url_id):
         self.parser.add_argument('url', type=url_validator, required=True, help='url is invalid')
+        self.parser.add_argument('short_url', type=short_url, required=True, help='short link must be at least 3 characters long')
         args = self.parser.parse_args()
 
         url_to_patch = UrlModel.query.filter((UrlModel.id == url_id) & (UrlModel.user_id == g.user.id)).first()
@@ -73,7 +76,14 @@ class Url(Resource):
         if url is not None and url.id != url_to_patch.id:
             return {'message':'url has been shortened already'}, 403
 
+        if url_to_patch.short_path != args['short_url']:
+            url = UrlModel.query.filter((UrlModel.short_path == args['short_url'])).first()
+
+            if url is not None:
+                return {'message':'short url is not available'}, 403
+
         url_to_patch.path = args['url']
+        url_to_patch.short_path = args['short_url']
         db.session.commit()
         data = {'url':url_to_patch}
         

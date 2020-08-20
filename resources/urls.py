@@ -60,6 +60,7 @@ class Urls(Resource):
             return {'message':message}, 403
 
         length = random.randint(5, 8)
+        custom = False
 
         if args['short_url'] == '':
             short_path = self.shorten(length, g.user.id)
@@ -70,8 +71,10 @@ class Urls(Resource):
             if url is not None:
                 message = '{0} is not available'.format(short_path)
                 return {'message':message}, 403
+            
+            custom = True
 
-        url = Url(group_id=args['group_id'], user_id=g.user.id, path=args['url'], short_path=short_path)
+        url = Url(group_id=args['group_id'], user_id=g.user.id, path=args['url'], short_path=short_path, custom=custom)
         db.session.add(url)
         db.session.commit()
 

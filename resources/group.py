@@ -25,7 +25,8 @@ class RedirectsField(fields.Raw):
 
         for redirect in redirects:
             data = {}
-            data['url'] = redirect.url.short_path
+            data['short_url'] = redirect.url.short_path
+            data['url'] = redirect.url.path
             data['created_at'] = redirect.created_at.strftime('%B %d, %Y %H:%M')
 
             response.append(data)
@@ -62,12 +63,13 @@ class Group(Resource):
         if group is None:
             return {'message':'group does not exist'}, 404
 
-        stop = current_app.config['PER_PAGE']
+        stop_url = current_app.config['PER_PAGE']
+        stop_redirect = current_app.config['PER_PAGE'] * 2
         urls = group.urls
         redirects = group.redirects
         group.created_time = group.created_at.strftime('%B %d, %Y %H:%M')
 
-        data = {'group':group,'urls':urls[0:stop] ,'redirects':redirects[0:stop], 'total_urls':len(urls),
+        data = {'group':group,'urls':urls[0:stop_url] ,'redirects':redirects[0:stop_redirect], 'total_urls':len(urls),
         'total_redirects':len(redirects)}
 
         return marshal(data, self.group_all_field, envelope='data')
