@@ -6,12 +6,12 @@ from models import db, User, PasswordReset
 from utilities.validators import email, password
 from utilities.middlewares import authenticate
 from utilities.mail import send_activate_mail
-from utilities.encode64 import encode
 from datetime import datetime
 from os import path
 import random
 import string
 import time
+import boto3
 
 
 class Users(Resource):
@@ -21,7 +21,7 @@ class Users(Resource):
             'user':{
                 'name':fields.String(attribute='user.name'),
                 'email':fields.String(attribute='user.email'),
-                'avatar':fields.String(attribute='avatar')
+                'avatar':fields.String(attribute='user.avatar')
             }
         }
         self.allowed_extensions = ['jpg', 'jpeg', 'png']
@@ -37,7 +37,7 @@ class Users(Resource):
         if user:
             return {'message':'User with email exists'}, 403
 
-        avatar_path = self.generate_default_user_image()
+        avatar_path = current_app.config['S3_BUCKET_LINK'] + 'users/unknown.png'; 
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 100)).lower()
         new_user = User(name=args['name'], email=args['email'], password=generate_password_hash(args['password']),
         avatar=avatar_path, activation_token=token)
@@ -45,7 +45,7 @@ class Users(Resource):
         send_activate_mail(new_user)
         db.session.add(new_user)
         db.session.commit()
-        data = {'user':new_user, 'avatar':encode(new_user.avatar)}
+        data = {'user':new_user}
         return marshal(data, self.user_field, envelope='data'), 201
 
     def patch(self):
@@ -76,17 +76,32 @@ class Users(Resource):
         if ext not in self.allowed_extensions:
             return {'message':'unsupported file extension'}, 400
 
-        filename = str(time.time()) + filename
-        user_images_dir = path.join(current_app.config['BASE_DIR'], 'images', 'users', filename)
-        avatar.save(user_images_dir)
+        filename = 'users' + '/' + str(time.time()) + filename
 
         user = User.query.get(g.user.id)
-        user.avatar = user_images_dir
+        user.avatar = self.upload_to_s3(user, filename, avatar)
 
         db.session.commit()
-        data = {'user':user, 'avatar':encode(user.avatar)}
+        data = {'user':user}
 
         return marshal(data, self.user_field, envelope='data')
+
+    def upload_to_s3(self, user, filename, avatar):
+        s3_resource = boto3.resource('s3', 
+        aws_access_key_id=current_app.config['S3_ACCESS_KEY_ID'],
+        aws_secret_access_key=current_app.config['S3_SECRET_KEY'])
+
+        default_avatar = current_app.config['S3_BUCKET_LINK'] + 'users/unknown.png'
+        bucket = s3_resource.Bucket(current_app.config['S3_BUCKET'])
+
+        if user.avatar != default_avatar:
+            key = user.avatar.split(current_app.config['S3_BUCKET_LINK'])[1]
+            bucket.Object(key).delete()
+
+        bucket.Object(filename).put(ACL='public-read', Body=avatar)
+        file_path = current_app.config['S3_BUCKET_LINK'] + filename
+
+        return file_path
 
     def change_password(self):
         self.parser.add_argument('password', type=password, required=True, help='password must be at least 8 characters')
@@ -119,12 +134,7 @@ class Users(Resource):
         user.activation_token = None
         db.session.commit()
 
-        data = {'user':user, 'avatar':encode(user.avatar)}
+        data = {'user':user}
         return marshal(data, self.user_field, envelope='data')
-
-    def generate_default_user_image(self):
-        avatar_path = path.join(current_app.config['BASE_DIR'], 'images', 'users', 'anon.png')
-
-        return avatar_path
 
 

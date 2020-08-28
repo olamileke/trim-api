@@ -3,7 +3,6 @@ from models import db, User
 from utilities.validators import email, password
 from werkzeug.security import check_password_hash
 from utilities.token import generate_token
-from utilities.encode64 import encode
 
 class Auth(Resource):
     def __init__(self):
@@ -13,7 +12,7 @@ class Auth(Resource):
             'user':{
                 'name':fields.String(attribute='user.name'),
                 'email':fields.String(attribute='user.email'),
-                'avatar':fields.String(attribute='avatar')
+                'avatar':fields.String(attribute='user.avatar')
             }
         }
 
@@ -30,7 +29,7 @@ class Auth(Resource):
         if check_password_hash(user.password, args['password']) == False:
             return {'message':'Incorrect email or password'}, 404
 
-        data = {'avatar':encode(user.avatar), 'token':generate_token(user.id), 'user':user}
+        data = {'token':generate_token(user.id), 'user':user}
 
         return marshal(data, self.field, envelope='data')
             

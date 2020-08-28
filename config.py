@@ -17,6 +17,10 @@ class Config(object):
     MAIL_FROM = "Trim"
     MAIL_FROM_URL = "<admin@trimm.in>"
     PER_PAGE = 10
+    S3_BUCKET = 'thetrimbucket'
+    S3_BUCKET_LINK = 'https://s3-us-east-2.amazonaws.com/thetrimbucket/'
+    S3_ACCESS_KEY_ID = 'AKIAWQHYH6CU7J76DLG2'
+    S3_SECRET_KEY = '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'
 
 class DevelopmentConfig(Config):
     DEBUG = False
