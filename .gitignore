@@ -13,3 +13,6 @@ migrations
 
 # VSCode files
 .vscode
+
+# app configuration
+config.py
