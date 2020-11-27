@@ -11,11 +11,11 @@ from resources.group import Group
 from resources.redirects import Redirects
 from resources.stats import Stats
 from resources.password_resets import PasswordResets
-from config.config import DevelopmentConfig
+from config import config
 import os
 
 app = Flask(__name__)
-app.config.from_object(DevelopmentConfig)
+app.config.from_object('config.DevelopmentConfig')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{0}:{1}@{2}/{3}'.format(app.config['DB_USER'],
 app.config['DB_PASSWORD'], app.config['DB_PORT'], app.config['DB_NAME'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
