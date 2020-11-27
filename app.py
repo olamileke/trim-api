@@ -11,7 +11,7 @@ from resources.group import Group
 from resources.redirects import Redirects
 from resources.stats import Stats
 from resources.password_resets import PasswordResets
-from .config import DevelopmentConfig
+from config.config import DevelopmentConfig
 import os
 
 app = Flask(__name__)
