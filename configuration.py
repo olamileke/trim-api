@@ -19,8 +19,8 @@ class Config(object):
     PER_PAGE = 6
     S3_BUCKET = 'thetrimappbucket'
     S3_BUCKET_LINK = 'https://s3-us-east-2.amazonaws.com/thetrimappbucket/'
-    S3_ACCESS_KEY_ID = 'AKIAZDKFKYGLWFFFCJU3'
-    S3_SECRET_KEY = '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'
+    S3_ACCESS_KEY_ID = 'AKIAZDKFKYGLUI4DURFY'
+    S3_SECRET_KEY = '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'
 
 class DevelopmentConfig(Config):
     DEBUG = False

@@ -1,6 +1,6 @@
 
 # Configuration
-config.py
+configuration.py
 
 # Virtual Machine folder
 venv
@@ -15,4 +15,4 @@ migrations
 .vscode
 
 # app configuration
-config.py
+configuration.py
