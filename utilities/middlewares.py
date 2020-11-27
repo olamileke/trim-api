@@ -6,7 +6,12 @@ import jwt
 def authenticate(method):
     @wraps(method)
     def middleware(*args, **kwargs):
-        token = request.headers.get('Authorization').split(' ')[1]
+        header = request.headers.get('Authorization')
+
+        if not header:
+            return {'error':{'message':'Authentication failed'}}, 401
+
+        token = header.split(' ')[1]
 
         if token is None:
             return {'error':{'message':'Authentication failed'}}, 401
