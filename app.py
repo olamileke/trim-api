@@ -2,7 +2,7 @@ from flask_restful import Api, Resource
 from flask import Flask
 from flask_migrate import Migrate
 from models import db
-from config import DevelopmentConfig
+from configuration import DevelopmentConfig
 from resources.users import Users
 from resources.auth import Auth
 from resources.groups import Groups
