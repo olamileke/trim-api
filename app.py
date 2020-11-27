@@ -45,6 +45,3 @@ api.add_resource(Url, '/api/urls/<int:url_id>')
 api.add_resource(Redirects, '/api/redirects')
 api.add_resource(Stats, '/api/stats')
 api.add_resource(PasswordResets, '/api/password/reset')
-
-if __name__ == '__main__':
-    app.run()

@@ -17,8 +17,7 @@ class Stats(Resource):
         totals = self.totals(g.user.id)
         redirect_stats = self.redirect_stats(g.user.id)
         url_stats = self.url_stats(g.user.id)
-        redirects = self.get_redirects(g.user.id)
-        data = {'totals':totals, 'redirect_stats':redirect_stats, 'url_stats':url_stats, 'redirects':redirects}
+        data = {'totals':totals, 'redirect_stats':redirect_stats, 'url_stats':url_stats}
 
         return {'data':data}
     
@@ -42,14 +41,6 @@ class Stats(Resource):
                     break
 
         return data
-
-    def get_redirects(self, user_id):
-        redirects = Redirect.query.filter((Redirect.user_id == user_id)).order_by(Redirect.created_at.desc())[:3]
-
-        for redirect in redirects:
-            redirect.created_time = redirect.created_at.strftime('%B %d, %Y %H:%M')
-
-        return marshal(redirects, self.redirect_field)
 
     def redirect_stats(self, user_id):
         last_week_date = date.today() - timedelta(days=7)

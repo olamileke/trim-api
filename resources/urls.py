@@ -59,7 +59,7 @@ class Urls(Resource):
             message = '{0} has been shortened'.format(args['url'])
             return {'message':message}, 403
 
-        length = random.randint(5, 8)
+        length = random.randint(4, 8)
         custom = False
 
         if args['short_url'] == '':
