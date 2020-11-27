@@ -15,7 +15,7 @@ from config import DevelopmentConfig
 import os
 
 app = Flask(__name__)
-app.config.from_envvar(os.getenv('APP_CONFIG'));
+app.config.from_envvar(os.getenv('APP_CONFIG'))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{0}:{1}@{2}/{3}'.format(app.config['DB_USER'],
 app.config['DB_PASSWORD'], app.config['DB_PORT'], app.config['DB_NAME'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
