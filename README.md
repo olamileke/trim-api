@@ -73,7 +73,7 @@ Locate the configuration.py file in the application root and do the following
 - Set S3_ACCESS_KEY_ID to the access key id of the IAM(AWS) user created earlier
 - Set S3_SECRET_KEY to the secret access key of the IAM(AWS) user created earlier
 
-The next step is to set up the database. Run
+The next step is to set up the database. Still in the application root, run
 ```
 python manage.py db init
 ```
