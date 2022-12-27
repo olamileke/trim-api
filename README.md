@@ -1,6 +1,6 @@
 ### Trim-Be
 ----
-REST API backend of the Trim application written in Flask-Restful. View the live application [here](https://trimm.xyz "here").
+REST API backend of the Trim application written in Flask-Restful. View the live application [here](https://trimapp.netlify.app/ "here").
 
 The front end is written in Angular and can be found [here](https://github.com/olamileke/trim-fe "here").
 
