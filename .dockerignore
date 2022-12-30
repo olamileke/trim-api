@@ -1,0 +1,12 @@
+
+# Environment
+.env
+
+# Github Actions Deployment Config
+.github
+
+# Virtual Machine folder
+venv
+
+# Pycache folder
+__pycache__
