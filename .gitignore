@@ -1,4 +1,7 @@
 
+# Environment
+.env
+
 # Configuration
 configuration.py
 
@@ -7,9 +10,6 @@ venv
 
 # Pycache folder
 __pycache__
-
-# Migrations folder
-migrations
 
 # VSCode files
 .vscode
